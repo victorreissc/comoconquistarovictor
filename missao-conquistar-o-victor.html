@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Missão: Conquistar o Victor</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--pk:#ff3d9a;--pn:#ffd9ec;--gr:#7cff4f;--tx:#2a0f3a;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:#1a0b2e;color:#fff;font-family:ui-monospace,Menlo,Consolas,monospace}
+#bg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;image-rendering:pixelated}
+.px,.btn,h1,.pill{font-family:'Press Start 2P',ui-monospace,monospace}
+#app{max-width:520px;margin:0 auto;padding:10px}
+.box{background:rgba(26,11,46,.9);border:4px solid var(--pk);border-radius:6px;box-shadow:0 0 0 2px #3a1450,0 0 18px rgba(255,61,154,.35);padding:10px;margin-top:10px;position:relative}
+.hud{display:flex;align-items:center;gap:8px;padding:6px 8px;margin-top:0}
+.av{width:36px;height:36px;overflow:hidden;border:2px solid var(--pk);background:#3a1450;flex:none;display:block}
+.av canvas{width:56px;height:84px;margin:-1px 0 0 -10px}
+.hh img{width:24px;height:21px;margin-right:3px;image-rendering:pixelated}
+.sc{margin-left:auto;text-align:right;font-size:8px;color:#ffd9ec;line-height:1.7}.sc b{font-size:13px;color:#fff}
+.bar{height:12px;border:3px solid var(--pk);background:#2a0f3a;margin-top:6px;border-radius:4px}.bar i{display:block;height:100%;background:var(--gr);transition:width .5s}
+canvas{image-rendering:pixelated;display:block}
+.chc{width:104px;flex:none}.chc canvas{width:104px;height:156px}
+.ch{display:block;animation:bob 1.2s steps(2) infinite}
+.qw{display:flex;gap:6px;align-items:flex-end;margin-top:6px}
+.pnl{flex:1;min-width:0;background:var(--pn);color:var(--tx);border:3px solid var(--pk);border-radius:10px;padding:10px}
+.pnl h2{font-size:14px;text-align:center;margin:2px 0 10px;line-height:1.4}
+.pnl p{font-size:13px;line-height:1.4;margin:6px 0}
+.pill{display:inline-block;background:var(--pk);color:#fff;font-size:10px;padding:7px 10px;border:2px solid var(--pn);border-radius:8px;margin-top:12px}
+.btn{display:block;width:100%;margin:8px 0;padding:13px 10px;background:var(--pk);color:#fff;border:3px solid #fff;border-radius:8px;font-size:10px;line-height:1.5;cursor:pointer;box-shadow:0 4px 0 #8a1a5a}
+.btn:active{transform:translateY(3px);box-shadow:none}.btn:disabled{opacity:.4}
+.btn.o{display:flex;gap:8px;align-items:center;background:#3a1450;color:#fff;border:3px solid var(--pk);font:13px/1.25 ui-monospace,Menlo,monospace;padding:10px 8px;text-align:left;margin:6px 0;box-shadow:none}
+.btn.o:before{content:"";flex:none;width:14px;height:14px;border:3px solid var(--pk);border-radius:50%;background:var(--pn)}
+.btn.o:disabled{text-decoration:line-through}
+.bubs{background:#fff;border:2px solid var(--pk);border-radius:8px;padding:8px;font-size:12px;line-height:1.35;margin:8px 0 4px}
+.bub{background:var(--pn);color:var(--tx);border:3px solid var(--pk);border-radius:10px;padding:10px;font-size:14px;line-height:1.4;margin:8px 0}
+.pts{text-align:right;font-size:12px;font-weight:bold;color:#b0206a}.pts:before{content:"★ ";color:#f5b800}
+input,textarea{width:100%;padding:10px;font:14px ui-monospace,monospace;border:3px solid #7b2a8f;border-radius:6px;background:#fff;color:var(--tx)}
+h1{color:var(--gr);font-size:26px;line-height:1.25;text-align:center;margin:8px 0;text-shadow:3px 3px 0 #2a0f3a,0 0 14px rgba(124,255,79,.35)}
+h1 small{display:block;color:#fff;font-size:15px}
+.gr{color:var(--gr);text-shadow:2px 2px 0 #2a0f3a}
+.port{height:290px;overflow:hidden}.port canvas{width:300px;height:450px;margin:0 auto}
+.hf{position:absolute;color:var(--pk);font-size:22px;animation:bob 2s steps(2) infinite}
+.sm{font-size:13px;line-height:1.45}
+.fade{animation:fade .5s}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}}
+@keyframes bob{50%{transform:translateY(-3px)}}
+@keyframes hop{30%{transform:translateY(-22px)}60%{transform:translateY(0)}80%{transform:translateY(-8px)}}
+@keyframes cheer{30%{transform:translateY(-28px) scale(1.08)}60%{transform:translateY(0)}}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.hop{animation:hop .6s}.cheer{animation:cheer .7s}.shake{animation:shake .4s}
+</style></head><body><canvas id="bg"></canvas><div id="app"><div id="h"></div><div id="m"></div></div>
+<script>
+const pat=(x,a,b,rows,col)=>{x.fillStyle=col;rows.forEach((s,j)=>[...s].forEach((c,i)=>c=="x"&&x.fillRect(a+i,b+j,1,1)))};
+const HR=[".xx.xx.","xxxxxxx","xxxxxxx",".xxxxx.","..xxx..","...x..."];
+// ---------- FUNDO (cidade ao entardecer) ----------
+function bg(){const c=document.getElementById("bg"),x=c.getContext("2d"),W=90,Hh=160;c.width=W;c.height=Hh;
+ ["#1a0b2e","#2a1048","#4a1456","#6a1a6a","#8a2a7a","#b03a8a"].forEach((col,i)=>{x.fillStyle=col;x.fillRect(0,i*Hh/6,W,Hh/6+1)});
+ x.fillStyle="#d04aa0";[[8,62,26,4],[52,48,30,4],[58,92,26,3]].forEach(a=>{x.fillRect(a[0],a[1],a[2],a[3]);x.fillRect(a[0]+4,a[1]-2,a[2]-10,2)});
+ x.fillStyle="#ffd9ec";[[12,10],[70,18],[40,30],[80,50],[20,44]].forEach(a=>x.fillRect(a[0],a[1],1,1));
+ for(let i=0,px=0;px<W;i++){const w=8+(i*7)%9,h=40+(i*37)%50;x.fillStyle=i%2?"#241038":"#1a0b2e";x.fillRect(px,Hh-h,w,h);
+  x.fillStyle="#ff6ac0";for(let a=px+2;a<px+w-1;a+=3)for(let b=Hh-h+4;b<Hh-3;b+=5)if((a*b+i)%7==0)x.fillRect(a,b,1,2);px+=w}}
+bg();
+// ---------- SPRITES CHIBI (28x42) ----------
+const CF={
+ v:{S:"#d9a07a",D:"#b87d5c",H:"#1b1210",F:"#4a352b",B:"#0d0706",T:"#17171c",P:"#26262e",W:"#f2f2f2",L:"#c8383a",top:1,ear:1,ch:1,g:0},
+ p:{S:"#efbc94",D:"#cf9a74",H:"#3a2418",F:"#5a4030",B:"#2a160c",T:"#f4f0ea",P:"#2d2d3a",W:"#f2f2f2",L:"#c86a60",top:0,ear:0,ch:0,g:1}};
+function spr(w,P){P=P||"idle";const c=document.createElement("canvas");c.width=28;c.height=42;const x=c.getContext("2d"),k=CF[w];
+ const r=(a,b,cw,h,col)=>{x.fillStyle=col;x.fillRect(a,b,cw,h)};
+ const joy=/shy|heart|cheer/.test(P);
+ r(9,30,4,8,k.P);r(15,30,4,8,k.P);r(8,38,6,3,k.W);r(14,38,6,3,k.W);r(8,40,6,1,"#c4c4d0");r(14,40,6,1,"#c4c4d0");
+ r(8,20,12,11,k.T);r(12,19,4,1,k.D);
+ if(k.ch){[[11,20],[12,21],[13,22],[14,22],[15,22],[15,21],[16,20]].forEach(a=>r(a[0],a[1],1,1,"#e4e8f2"))}
+ r(5,20,3,4,k.T);r(5,24,3,5,k.S);
+ if(!/think|shades|heart|shy|cheer/.test(P)){r(20,20,3,4,k.T);r(20,24,3,5,k.S)}
+ // cabeça
+ r(6,6,16,13,k.S);x.clearRect(6,18,1,1);x.clearRect(21,18,1,1);
+ r(4,11,2,4,k.S);r(22,11,2,4,k.S);
+ if(k.ear){[[23,15],[22,16],[24,16],[23,17],[4,15],[3,16],[5,16],[4,17]].forEach(a=>r(a[0],a[1],1,1,"#eceef6"))}
+ r(5,3,18,6,k.H);if(k.top){r(7,0,14,3,k.H);r(5,2,3,2,k.H);r(14,8,3,1,k.D)}else r(7,2,14,1,k.H);
+ r(6,6,16,3,k.H);r(5,9,2,5,k.F);r(21,9,2,5,k.F);
+ r(8,10,5,2,k.B);r(15,10,5,2,k.B);
+ const eyes=(ox)=>{if(joy){r(ox,14,1,1,"#150c0c");r(ox+1,13,1,1,"#150c0c");r(ox+2,14,1,1,"#150c0c")}else{r(ox,13,3,3,"#150c0c");r(ox,13,1,1,"#fff")}};
+ eyes(9);eyes(17);
+ if(k.g){const G="#6b4a2a";[8,16].forEach(o=>{r(o,12,5,1,G);r(o,16,5,1,G);r(o,12,1,5,G);r(o+4,12,1,5,G)});r(13,13,3,1,G)}
+ if(P=="shades"){r(8,12,5,4,"#0d0d12");r(16,12,5,4,"#0d0d12");r(13,13,3,1,"#0d0d12");r(9,12,2,1,"#555")}
+ r(14,15,1,1,k.D);
+ if(joy){r(7,16,3,1,"#f08a80");r(19,16,3,1,"#f08a80")}
+ if(P=="cheer"){r(12,17,5,2,"#7a1020");r(13,17,3,1,"#fff")}
+ else if(P=="shock"){r(13,17,3,2,"#6a1424")}
+ else{r(12,17,5,1,k.L);r(13,18,3,1,k.L)}
+ // poses (braços por cima)
+ if(P=="think"){r(20,20,4,3,k.T);r(21,16,3,5,k.S);pat(x,23,0,["xxx","..x",".x.","...",".x."],"#ffd9ec")}
+ if(P=="shades"){r(20,20,3,3,k.T);r(22,21,5,2,k.S);r(25,2,1,3,"#ffd9ec");r(24,3,3,1,"#ffd9ec")}
+ if(P=="heart"){r(20,20,3,3,k.T);r(19,23,3,3,k.S);r(6,23,3,3,k.S);pat(x,10,23,HR,"#ff3d9a");r(11,24,1,1,"#fff")}
+ if(P=="shy"){r(20,20,3,3,k.T);r(3,14,3,7,k.S);r(22,14,3,7,k.S);r(5,14,3,3,k.S);r(20,14,3,3,k.S)}
+ if(P=="cheer"){r(20,18,4,3,k.T);r(2,6,3,12,k.S);r(23,6,3,12,k.S);r(5,18,3,2,k.T);pat(x,0,2,[".x.","xxx",".x."],"#ffe66a");pat(x,25,1,[".x.","xxx",".x."],"#ffe66a")}
+ if(P=="shock"){pat(x,24,0,["x.x","x.x","x.x","...","x.x"],"#ffd9ec")}
+ return c}
+function chest(){const c=document.createElement("canvas");c.width=24;c.height=18;const x=c.getContext("2d"),r=(a,b,w,h,col)=>{x.fillStyle=col;x.fillRect(a,b,w,h)};
+ [[3,2],[9,0],[15,2],[6,5],[12,5]].forEach(a=>pat(x,a[0],a[1],HR,"#ff3d9a"));
+ r(1,9,22,9,"#7a4a22");r(1,9,22,2,"#a8682c");r(1,13,22,1,"#d8a030");r(10,11,4,4,"#f0c040");r(1,9,1,9,"#d8a030");r(22,9,1,9,"#d8a030");return c}
+function hc(f){const c=document.createElement("canvas");c.width=7;c.height=6;const x=c.getContext("2d");pat(x,0,0,HR,f?"#ff3d9a":"#4a1f55");if(f){x.fillStyle="#fff";x.fillRect(1,1,1,1)}return c.toDataURL()}
+// ---------- DADOS (perguntas) ----------
+const PH=[
+ {t:"THE VICTOR FILES",pt:10,v:"Vamos ver se você me conhece mesmo… 👀",m:"Passou na triagem. Mas a parte difícil vem agora."},
+ {t:"THE MUSIC DEPARTMENT",pt:15,v:"Agora você entra no meu universo favorito: a música. 🎧",m:"Você sobreviveu à playlist. Eu poderia explicar cada faixa agora."},
+ {t:"MIND GAMES",pt:20,v:"Aqui não tem decoreba. Quero ver se você me entende.",m:"Gostei de ver você pensar antes de responder."},
+ {t:"LOVE, ACTUALLY?",pt:25,v:"Última fase. Aqui vale tudo: atenção, maturidade e sinceridade.",m:"Chegou até aqui. Isso diz muita coisa."}];
+const Q=[[
+ ["Victor é seu primeiro ou segundo nome?",["Primeiro nome","Segundo nome","Nome do meio inventado","Apelido de infância"]],
+ ["Quantos irmãos o Victor tem?",["Nenhum, é filho único","Dois irmãos","Uma irmã","Três irmãos caóticos"]],
+ ["Como se chama a cachorrinha do Victor?",["Luna","Laila","Mel","Princesa"]],
+ ["Quem é uma das pessoas mais próximas do Victor?",["Evelyn","Isabela","Camila","Fernanda"]],
+ ["Qual curso universitário o Victor faz?",["Direito","Medicina","Psicologia","Publicidade"]],
+ ["Em qual área da Psicologia ele quer atuar?",["Clínica","Organizacional","Escolar","Esportiva"]],
+ ["Além do Amazonas, em qual estado o Victor já morou?",["São Paulo","Bahia","Paraná","Ceará"]],
+ ["Qual país o Victor sonha em conhecer?",["Japão","Coreia do Sul","Itália","Islândia"]],
+ ["Quais são as culinárias favoritas do Victor?",["Italiana e mexicana","Asiática e brasileira","Árabe e francesa","Só fast food"]],
+ ["Qual o gênero de filme favorito do Victor?",["Comédia romântica","Ação","Terror","Animação"]],
+ ["Qual seria o encontro ideal do Victor?",["Cinema","Piquenique","Show","Parque de diversões"]],
+ ["O Victor é mais…",["Quieto e misterioso","Comunicativo","Só fala de manhã","Telepata"]],
+ ["Quando gosta de alguma coisa, o Victor…",["Fica em silêncio","Explica tudo sobre aquilo","Finge que não ligou","Posta só nos stories"]]],
+[
+ ["Qual é o artista favorito do Victor?",["Beyoncé","Billie Eilish","Taylor Swift","Harry Styles"]],
+ ["Qual é a música favorita do Victor?",["Green Light, Lorde","Ribs, Lorde","Royals, Lorde","Team, Lorde"]],
+ ["Qual música da Lorde representa melhor o Victor?",["Liability","Perfect Places","400 Lux","Supercut"]],
+ ["Qual é o álbum favorito de Phoebe Bridgers?",["Stranger in the Alps","Punisher","Copycat Killer","Better Oblivion"]],
+ ["Qual composição de Phoebe Bridgers é a favorita dele?",["Kyoto","Motion Sickness","I Know the End","Chinese Satellite"]],
+ ["Qual música o Victor sonha em viver?",["Video Games","Love Song, Lana Del Rey","Young and Beautiful","Summertime Sadness"]],
+ ["O que mais chama a atenção do Victor em uma música?",["O beat","O clipe","A composição","Ser viral"]],
+ ["Victor prefere músicas…",["Dançantes","Com letras profundas","Tanto faz","Só instrumentais"]]],
+[
+ ["Situação: no encontro, o assunto é só aparência e status. O que o Victor mais detesta?",["Silêncio constrangedor","Futilidade e superficialidade","Atraso de 5 minutos","Gosto musical diferente"]],
+ ["O que mais incomoda o Victor nas relações humanas?",["Disputas de ego","Ciúme fofo","Pedir desculpas","Mandar áudio"]],
+ ["Um amigo some porque passa por um momento difícil. Qual atitude o Victor mais abomina?",["Mandar mensagem","Dar espaço","Falta de empatia e de compreensão do contexto de cada pessoa","Perguntar como a pessoa está"]],
+ ["O que o Victor procura nas pessoas?",["Transparência e sinceridade","Muitos seguidores","Mistério e joguinhos","Carro bonito"]],
+ ["Situação aberta: você errou e percebeu que magoou o Victor. O que faria? (escreva)",null]],
+[
+ ["Qual é a linguagem do amor do Victor?",["Presentes","Atos de serviço","Palavras de afirmação","Toque físico"]],
+ ["Para o Victor, o que é estar presente?",["Visualizar e não responder","Comunicação","Aparecer só em datas especiais","Curtir todos os stories"]],
+ ["O que é mais importante para o Victor num relacionamento?",["Comunicação","Ciúme","Mistério","Hobbies iguais"]],
+ ["Qual a melhor forma de demonstrar carinho ao Victor?",["Joguinhos pra ele correr atrás","Estar presente, sem joguinhos","Sumir pra dar saudade","Surpresas caríssimas"]],
+ ["Love Song, da Lana Del Rey, é a música que ele sonha em viver. O que ela representa emocionalmente pra ele? (escreva)",null],
+ ["Qual música representa o amor que o Victor gostaria de viver?",["400 Lux, Lorde","Ribs, Lorde","Blank Space, Taylor Swift","Motion Sickness"]],
+ ["Situação aberta: o Victor está quieto depois de um dia difícil. Como você demonstraria carinho? (escreva)",null]]];
+// ---------- GABARITO (separado da interface) ----------
+const KEY=[[1,2,1,0,2,1,2,1,1,2,0,1,1],[2,1,2,1,3,1,2,1],[1,0,2,0,/pedi|desculp|conversa|explic|assum|sinc|entend|ou[cç]|empati|respeit|sent/gi],
+ [2,1,0,1,null,0,/pergunt|conversa|ou[cç]|presen|aqui|junto|escut|espa[cç]o|sincer|apoi|carinho|abra[cç]/gi]];
+const OK=["Isso! Victor sorriu de canto.","Você está chegando perto…","Ponto pra você. Atenta!","Hm… você presta atenção mesmo."];
+const NO=["Victor está observando…","Você realmente presta atenção?","Essa resposta foi suspeita.","Tem certeza de que conhece o protagonista?"];
+// ---------- ESTADO ----------
+const $=s=>document.querySelector(s),rnd=a=>a[Math.floor(Math.random()*a.length)];
+const E=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const TOT=Q.reduce((a,p)=>a+p.length,0);
+const fresh=()=>({s:"title",p:0,i:0,sc:0,lv:3,done:0,po:0,ps:0,tr:0,pend:[],nm:"",f:0});
+let S;try{S=JSON.parse(sessionStorage.getItem("cv"))}catch(e){}S=S||fresh();
+let ord=[],line="",dn=false;const POSE=["think","shades","heart","shy"],HF=hc(1),HE=hc(0);
+const save=()=>{try{sessionStorage.setItem("cv",JSON.stringify(S))}catch(e){}};
+function mount(rt){rt.querySelectorAll("[data-s]").forEach(e=>e.replaceChildren(spr(e.dataset.s,e.dataset.pose)));rt.querySelectorAll("[data-chest]").forEach(e=>e.replaceChildren(chest()))}
+const hearts=()=>[0,1,2].map(i=>`<img src="${i<S.lv?HF:HE}">`).join("");
+function H(){return `<div class="box hud"><span class="av" data-s="p"></span><span class="hh">${hearts()}</span><span class="sc px">PONTOS<br><b>${String(S.sc).padStart(6,"0")}</b></span></div><div class="bar"><i style="width:${S.done/TOT*100}%"></i></div>`}
+function upd(){$("#h").innerHTML=H();mount($("#h"))}
+function an(e,c){if(!e)return;e.classList.remove(c);void e.offsetWidth;e.classList.add(c)}
+const ch=po=>`<div class="chc"><span data-s="v" data-pose="${po}" id="vc" class="ch"></span></div>`;
+function R(){save();const m=$("#m");m.className="";void m.offsetWidth;m.className="fade";
+ $("#h").innerHTML=S.s=="title"?"":H();m.innerHTML=V[S.s]();mount(document);window.scrollTo(0,0)}
+const go=s=>{S.s=s;R()};
+// ---------- TELAS ----------
+const V={
+title:()=>`<div class="box"><span class="hf" style="left:10px;top:8px">♥</span><span class="hf" style="right:12px;top:70px">♥</span><h1><small>MISSÃO:</small>CONQUISTAR<br>O VICTOR</h1><div class="port"><span data-s="v" data-pose="idle" class="ch"></span></div><div class="bub">Você recebeu uma missão muito especial…</div><button class="btn" onclick="go('intro')">INICIAR JOGO ▶</button></div>`,
+intro:()=>`<div class="qw">${ch("idle")}<div class="pnl"><h2>Preparado(a) para essa aventura? ♥</h2><p>Pelo visto você quer me conhecer melhor. São 4 fases, 3 vidas e muita provocação… 😏</p><input id="nm" maxlength="20" placeholder="Seu nome" value="${E(S.nm)}"><button class="btn" onclick="S.nm=$('#nm').value.trim();S.s='ph';R()">COMEÇAR ▶</button></div></div>`,
+ph:()=>`<span class="pill">FASE ${S.p+1} ♥</span><div class="qw">${ch(POSE[S.p])}<div class="pnl"><h2 class="px" style="font-size:12px">${PH[S.p].t}</h2><p>${PH[S.p].v}</p><p>Cada acerto vale +${PH[S.p].pt} pts. Errou? Perde um coração, mas a aventura continua.</p><button class="btn" onclick="go('q')">VAMOS ▶</button></div></div>`,
+q:()=>{const q=Q[S.p][S.i];dn=false;let a;
+ if(q[1]){ord=q[1].map((_,i)=>i).sort(()=>Math.random()-.5);a=ord.map((o,k)=>`<button class="btn o" onclick="pk(${k})">${E(q[1][o])}</button>`).join("")}
+ else a=`<textarea id="ta" rows="4" placeholder="Escreva com sinceridade…"></textarea><button class="btn" onclick="op()">RESPONDER ▶</button>`;
+ return `<span class="pill">FASE ${S.p+1} ♥</span><div class="qw">${ch(POSE[S.p])}<div class="pnl"><h2>${E(q[0])}</h2>${a}<div class="bubs" id="bb">${line||PH[S.p].v}</div><div id="act"></div><div class="pts">+${PH[S.p].pt} pts</div></div></div>`},
+end:()=>{const n=Q[S.p].length,r=S.po/n,t=r>=.8?"Quase um stalker autorizado 🕵️":r>=.5?"Boa! Dá pra melhorar no próximo episódio.":"Hm… precisa assistir mais episódios do Victor.";
+ return `<div class="box qw" style="align-items:center">${ch("cheer")}<div class="sm"><h2 class="px gr" style="font-size:15px;line-height:1.4">FASE CONCLUÍDA!</h2><p>Pontos na fase: <b>${S.ps}</b> · Acertos: <b>${S.po}/${n}</b></p><p>${t}</p><p>Victor: “${PH[S.p].m}”</p><p>🔓 ${S.p<3?"Próxima fase desbloqueada!":"Final desbloqueado!"}</p></div></div><button class="btn" onclick="S.p<3?(S.p++,S.i=0,S.po=0,S.ps=0,go('ph')):go('final')">${S.p<3?"PRÓXIMA FASE ▶":"FINAL ▶"}</button>`},
+final:()=>{const nm=E(S.nm||"Player 1"),f=S.f;
+ const rx=f==1?"Eu sabia… 💚 Então bora repetir essa missão: cinema, filme de terror e você me deixando explicar o final.":"Tudo bem. Sinceridade é o que eu mais valorizo, então você já ganhou meu respeito. A porta (e a playlist) continuam abertas.";
+ return `<div class="box"><span class="hf" style="left:10px;top:8px">♥</span><span class="hf" style="right:12px;top:40px">♥</span><h1 style="font-size:22px">PARABÉNS!<small>Você chegou ao fim, ${nm}!</small></h1><div class="port"><span data-s="v" data-pose="${f?"cheer":"heart"}" id="vc" class="ch"></span></div><div class="bub">${f?rx:"Conhecer o Victor vai muito além de decorar músicas, nomes e gostos. É entender a história dele, respeitar o contexto de cada pessoa, ter transparência, sinceridade e saber se comunicar."}</div><p class="px" style="font-size:10px;text-align:center">PONTUAÇÃO FINAL: ${S.sc}</p><div data-chest style="width:96px;margin:6px auto"></div>
+ ${f?`<button class="btn" id="cb" onclick="cp()">COPIAR RESPOSTAS PRO VICTOR</button><textarea id="ct" rows="6" hidden readonly></textarea><button class="btn" onclick="S=fresh();R()">JOGAR DE NOVO ↻</button>`
+ :`<h2 class="sm" style="text-align:center;font-size:14px">Depois de tudo isso, você ainda quer conquistar o Victor?</h2><button class="btn" onclick="S.f=1;R();an($('#vc'),'cheer')">QUERO, E AGORA SEI COMO 💚</button><button class="btn" onclick="S.f=2;R();an($('#vc'),'hop')">PRECISO PENSAR…</button>`}</div>`}
+};
+// ---------- RESPOSTAS ----------
+function fb(t,g){$("#bb").textContent=t;line=t;$("#vc").replaceChildren(spr("v",g?"cheer":"shock"));an($("#vc"),g?"cheer":"shake");upd()}
+const nb=()=>{$("#act").innerHTML='<button class="btn" onclick="nx()">CONTINUAR ▶</button>'};
+function win(p,t){dn=true;S.sc+=p;S.ps+=p;fb(t+" +"+p+" pts",1);nb();save()}
+function bad(){S.lv--;S.sc=Math.max(0,S.sc-5);S.tr++;let t=rnd(NO);
+ if(S.lv<=0){S.lv=3;S.sc=Math.max(0,S.sc-10);t="Sem vidas! Victor deu uma segunda chance (-10 pts)."}
+ if(S.tr>=2){dn=true;t+=" Vamos seguir…";nb()}else t+=" Tente de novo!";
+ fb(t,0);save()}
+function pk(k){if(dn)return;if(ord[k]===KEY[S.p][S.i]){S.po++;win(PH[S.p].pt,rnd(OK))}else{document.querySelectorAll(".o")[k].disabled=true;bad()}}
+function op(){if(dn)return;const t=$("#ta").value.trim(),r=KEY[S.p][S.i],pt=PH[S.p].pt;
+ if(t.length<15){fb("Conta mais um pouquinho… Victor gosta de explicações.",0);return}
+ const m=r?(t.match(r)||[]).length:0;let st="para o Victor validar";
+ if(r&&m>=2&&t.length>=20){st="aprovada automaticamente";S.po++;win(pt+10,"Resposta madura e sincera! Bônus")}
+ else win(Math.round(pt/2),"Anotei. O Victor vai ler essa com atenção…");
+ S.pend.push(Q[S.p][S.i][0]+"\n→ "+t+" ("+st+")");save()}
+function nx(){S.i++;S.done++;S.tr=0;line="";if(S.i>=Q[S.p].length)S.s="end";R()}
+function cp(){const t=`MISSÃO: CONQUISTAR O VICTOR\nJogador(a): ${S.nm||"Player 1"}\nPontos: ${S.sc}\nDecisão final: ${S.f==1?"Quer conquistar!":"Precisa pensar"}\n\nRespostas abertas:\n${S.pend.join("\n\n")}`;
+ const sh=()=>{const x=$("#ct");x.hidden=false;x.value=t;x.select()};
+ try{navigator.clipboard.writeText(t).then(()=>$("#cb").textContent="COPIADO! ✔",sh)}catch(e){sh()}}
+R();
+</script></body></html>
